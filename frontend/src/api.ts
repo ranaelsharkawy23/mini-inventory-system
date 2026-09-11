@@ -1,5 +1,4 @@
-import type { Product, Warehouse } from "./types";
-
+import type {Product, StockMovement, Warehouse} from "./types";
 // All requests go through Vite's dev proxy (see vite.config.ts), so a plain
 // "/api/..." path works in dev and in a same-origin production build alike.
 const BASE = "/api";
@@ -36,4 +35,5 @@ export const api = {
         toWarehouseId: number;
         quantity: number;
     }) => request("/inventory/transfer", { method: "POST", body: JSON.stringify(data) }),
+    getMovements: () => request<StockMovement[]>("/inventory/movements"),
 };
