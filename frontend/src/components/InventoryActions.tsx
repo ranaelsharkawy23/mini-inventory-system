@@ -11,7 +11,6 @@ interface Props {
     onChanged: () => void; // ask the parent to reload product data
 }
 
-/** Add / Remove / Transfer controls for a single (product, warehouse) row. */
 export function InventoryActions({ productId, warehouseId, warehouses, onChanged }: Props) {
     const [mode, setMode] = useState<Mode | null>(null);
     const [quantity, setQuantity] = useState("");

@@ -1,5 +1,4 @@
-// A small typed error so route handlers can throw a clear HTTP status + message
-// instead of every function returning ad-hoc {error} objects.
+
 export class AppError extends Error {
     status: number;
 
