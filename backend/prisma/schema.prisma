@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Warehouse {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  location  String?
+  createdAt DateTime @default(now())
+
+  inventoryItems InventoryItem[]
+  movements      StockMovement[]
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  sku         String   @unique
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  inventoryItems InventoryItem[]
+  movements      StockMovement[]
+}
+
+// One row per (product, warehouse) pair: "how much of this product sits in this warehouse".
+model InventoryItem {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  warehouseId Int
+  quantity    Int      @default(0)
+  updatedAt   DateTime @updatedAt
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+
+  @@unique([productId, warehouseId])
+}
+
+enum MovementType {
+  ADD
+  REMOVE
+  TRANSFER_IN
+  TRANSFER_OUT
+}
+
+// Audit log of every stock change (bonus requirement: "Logging of stock changes").
+model StockMovement {
+  id          Int          @id @default(autoincrement())
+  type        MovementType
+  productId   Int
+  warehouseId Int
+  quantity    Int
+  note        String?
+  createdAt   DateTime     @default(now())
+
+  product   Product   @relation(fields: [productId], references: [id])
+  warehouse Warehouse @relation(fields: [warehouseId], references: [id])
+}
