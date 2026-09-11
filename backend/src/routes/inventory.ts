@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { badRequest } from "../errors";
 import { addStock, removeStock, transferStock } from "../services/inventoryService";
-
+import { prisma } from "../db";
 export const inventoryRouter = Router();
 
 function parseIds(body: unknown, fields: string[]): Record<string, number> {
@@ -56,6 +56,22 @@ inventoryRouter.post("/transfer", async (req, res, next) => {
         ]);
         const result = await transferStock(productId, fromWarehouseId, toWarehouseId, quantity);
         res.json(result);
+    } catch (err) {
+        next(err);
+    }
+});
+
+// GET /api/inventory/movements
+// Returns the full stock movement history, most recent first — the audit
+// log every add/remove/transfer has been writing to all along.
+inventoryRouter.get("/movements", async (_req, res, next) => {
+    try {
+        const movements = await prisma.stockMovement.findMany({
+            orderBy: { createdAt: "desc" },
+            include: { product: true, warehouse: true },
+            take: 100,
+        });
+        res.json(movements);
     } catch (err) {
         next(err);
     }

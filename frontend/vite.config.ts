@@ -6,7 +6,7 @@ export default defineConfig({
     server: {
         port: 5173,
         proxy: {
-            // Lets the frontend call "/api/..." during dev without hardcoding a host.
+
             "/api": "http://localhost:4000",
         },
     },

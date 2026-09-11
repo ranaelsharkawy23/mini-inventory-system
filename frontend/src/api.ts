@@ -1,14 +1,24 @@
-import type { Product, Warehouse } from "./types";
+import type { Product, StockMovement, Warehouse } from "./types";
+import { clearToken, getToken } from "./auth";
 
-// All requests go through Vite's dev proxy (see vite.config.ts), so a plain
-// "/api/..." path works in dev and in a same-origin production build alike.
 const BASE = "/api";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+    const token = getToken();
+
     const res = await fetch(`${BASE}${path}`, {
-        headers: { "Content-Type": "application/json" },
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         ...options,
     });
+
+    if (res.status === 401) {
+        clearToken();
+        window.location.reload();
+        throw new Error("Session expired — please log in again");
+    }
 
     if (!res.ok) {
         const body = await res.json().catch(() => ({}));
@@ -18,6 +28,17 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+    login: (data: { email: string; password: string }) =>
+        request<{ token: string; user: { id: number; email: string } }>("/auth/login", {
+            method: "POST",
+            body: JSON.stringify(data),
+        }),
+    register: (data: { email: string; password: string }) =>
+        request<{ token: string; user: { id: number; email: string } }>("/auth/register", {
+            method: "POST",
+            body: JSON.stringify(data),
+        }),
+
     getProducts: () => request<Product[]>("/products"),
     createProduct: (data: { sku: string; name: string; description?: string }) =>
         request<Product>("/products", { method: "POST", body: JSON.stringify(data) }),
@@ -36,4 +57,5 @@ export const api = {
         toWarehouseId: number;
         quantity: number;
     }) => request("/inventory/transfer", { method: "POST", body: JSON.stringify(data) }),
+    getMovements: () => request<StockMovement[]>("/inventory/movements"),
 };

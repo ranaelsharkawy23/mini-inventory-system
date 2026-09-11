@@ -4,12 +4,17 @@ import type { Product, Warehouse } from "./types";
 import { ProductCard } from "./components/ProductCard";
 import { NewProductForm } from "./components/NewProductForm";
 import { NewWarehouseForm } from "./components/NewWarehouseForm";
+import { MovementsLog } from "./components/MovementsLog";
+import { LoginForm } from "./components/LoginForm";
+import { clearToken, getToken } from "./auth";
 
 export default function App() {
     const [products, setProducts] = useState<Product[]>([]);
     const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
+    const [refreshKey, setRefreshKey] = useState(0);
+    const [authenticated, setAuthenticated] = useState(() => getToken() !== null);
 
     const loadAll = useCallback(async () => {
         try {
@@ -20,6 +25,7 @@ export default function App() {
             setProducts(productsData);
             setWarehouses(warehousesData);
             setError(null);
+            setRefreshKey((k) => k + 1);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Failed to load data");
         } finally {
@@ -28,11 +34,24 @@ export default function App() {
     }, []);
 
     useEffect(() => {
-        loadAll();
-    }, [loadAll]);
+        if (authenticated) loadAll();
+    }, [authenticated, loadAll]);
+
+    if (!authenticated) {
+        return <LoginForm onAuthenticated={() => setAuthenticated(true)} />;
+    }
 
     return (
         <div className="app">
+            <button
+                onClick={() => {
+                    clearToken();
+                    setAuthenticated(false);
+                }}
+                style={{ float: "right" }}
+            >
+                Log Out
+            </button>
             <h1>Mini Inventory System</h1>
 
             {error && <p className="error">{error}</p>}
@@ -58,7 +77,9 @@ export default function App() {
                         />
                     ))}
                 </div>
+
             )}
+            <MovementsLog refreshKey={refreshKey} />
         </div>
     );
 }

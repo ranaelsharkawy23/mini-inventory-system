@@ -6,7 +6,12 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+model User {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
 model Warehouse {
   id        Int      @id @default(autoincrement())
   name      String   @unique
@@ -28,7 +33,6 @@ model Product {
   movements      StockMovement[]
 }
 
-// One row per (product, warehouse) pair: "how much of this product sits in this warehouse".
 model InventoryItem {
   id          Int      @id @default(autoincrement())
   productId   Int
@@ -49,7 +53,6 @@ enum MovementType {
   TRANSFER_OUT
 }
 
-// Audit log of every stock change (bonus requirement: "Logging of stock changes").
 model StockMovement {
   id          Int          @id @default(autoincrement())
   type        MovementType

@@ -2,8 +2,7 @@ import { MovementType, Prisma } from "@prisma/client";
 import { prisma } from "../db";
 import { badRequest, notFound } from "../errors";
 
-// Prisma's transaction client type — used so helper functions below can run
-// either standalone or as part of a larger transaction.
+
 type Tx = Prisma.TransactionClient;
 
 function assertPositiveInt(quantity: number, field = "quantity") {
@@ -12,11 +11,7 @@ function assertPositiveInt(quantity: number, field = "quantity") {
     }
 }
 
-/**
- * Gets (or creates, at zero) the InventoryItem row for a product/warehouse pair.
- * Using upsert means callers never have to worry about "first stock ever added"
- * as a special case.
- */
+
 async function getOrCreateInventoryItem(tx: Tx, productId: number, warehouseId: number) {
     const [product, warehouse] = await Promise.all([
         tx.product.findUnique({ where: { id: productId } }),
@@ -88,9 +83,7 @@ export async function transferStock(
         throw badRequest("Source and destination warehouses must be different");
     }
 
-    // Everything below runs in ONE database transaction: if any step fails
-    // (e.g. insufficient stock), Postgres rolls back all of it, so stock can
-    // never "disappear" from the source without appearing in the destination.
+
     return prisma.$transaction(async (tx) => {
         const source = await getOrCreateInventoryItem(tx, productId, fromWarehouseId);
 
