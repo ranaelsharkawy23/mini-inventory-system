@@ -30,29 +30,51 @@ A full-stack inventory management system supporting multiple warehouses and stoc
 
 ## Project layout
 mini-inventory-system/
-├── docker-compose.yml # one-command local Postgres
+├── docker-compose.yml           # one-command local Postgres
 ├── backend/
-│ ├── prisma/
-│ │ ├── schema.prisma # data model
-│ │ ├── migrations/ # generated SQL migrations
-│ │ └── seed.ts # optional sample data
-│ └── src/
-│ ├── index.ts # Express app entry point
-│ ├── auth.ts # JWT verification middleware
-│ ├── db.ts # shared Prisma client
-│ ├── errors.ts # typed application errors
-│ ├── routes/ # auth, products, warehouses, inventory endpoints
-│ └── services/
-│ ├── authService.ts # password hashing, token generation
-│ ├── inventoryService.ts # core stock logic + transactions
-│ └── inventoryService.test.ts
+│   ├── .env.example             # template for required environment variables
+│   ├── jest.config.js
+│   ├── package.json
+│   ├── tsconfig.json
+│   ├── prisma/
+│   │   ├── schema.prisma        # data model
+│   │   ├── migrations/          # generated SQL migrations
+│   │   └── seed.ts              # optional sample data
+│   └── src/
+│       ├── index.ts             # Express app entry point
+│       ├── auth.ts              # JWT verification middleware
+│       ├── db.ts                # shared Prisma client
+│       ├── errors.ts            # typed application errors
+│       ├── routes/
+│       │   ├── auth.ts          # register, login
+│       │   ├── products.ts
+│       │   ├── warehouses.ts
+│       │   └── inventory.ts     # add, remove, transfer, movements
+│       └── services/
+│           ├── authService.ts           # password hashing, token generation
+│           ├── inventoryService.ts      # core stock logic + transactions
+│           └── inventoryService.test.ts # integration tests
 └── frontend/
+├── .env.example
+├── index.html
+├── package.json
+├── tsconfig.json
+├── vite.config.ts
 └── src/
-├── App.tsx # root component, auth gate
-├── api.ts # all backend calls
-├── auth.ts # token storage
-├── types.ts # shared TypeScript types
-└── components/ # forms, product cards, movement log, login
+├── App.tsx              # root component, auth gate
+├── api.ts               # all backend calls
+├── auth.ts              # token storage
+├── index.css
+├── main.tsx             # React entry point
+├── types.ts             # shared TypeScript types
+├── vite-env.d.ts
+└── components/
+├── InventoryActions.tsx  # Add/Remove/Transfer per row
+├── LoginForm.tsx
+├── MovementsLog.tsx      # stock movement audit log
+├── NewProductForm.tsx
+├── NewWarehouseForm.tsx
+└── ProductCard.tsx       # expandable per-product inventory table
 
 ## Getting started on a new machine
 
