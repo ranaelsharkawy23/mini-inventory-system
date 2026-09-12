@@ -197,6 +197,28 @@ doesn't fully protect against).
 - **IDs are auto-incrementing integers**, not UUIDs — a deliberate choice for this scale of
   application; integers are smaller, faster to index and join, and this system has no need for
   the distributed-uniqueness or non-guessability properties UUIDs provide.
+- **`bcryptjs` over `bcrypt`** for password hashing — the native `bcrypt` package requires
+  compiling C++ code during install, which frequently fails on Windows without build tools set
+  up; `bcryptjs` is a pure-JavaScript equivalent that installs reliably everywhere, at a small
+  (irrelevant at this scale) cost to raw speed.
+- **The stock movement log caps at the 100 most recent entries** (no pagination). A reasonable
+  scope cut for an assignment-sized dataset; a production system handling years of history would
+  paginate this properly.
+- **CORS is currently open to all origins.** Appropriate for local development, but a real
+  deployment would restrict this to the actual frontend's domain rather than allowing any site
+  to call the API.
+- **Password policy is minimal** — 8 characters minimum, no complexity rules, no rate-limiting
+  on login attempts. Deliberately simple for this scope; documented as a known gap rather than
+  an oversight.
+- **Same-warehouse transfers are explicitly rejected** as an invalid operation, not silently
+  treated as a no-op — a transfer implies moving stock somewhere else.
+- **Tests use a real, isolated database rather than mocking Prisma.** The value being tested is
+  the transaction behavior itself (does a failed check really roll back both sides); mocking the
+  database out would test nothing meaningful about that guarantee.
+- **No frontend state management library** (Redux, Zustand, etc.) — plain React `useState` and
+  props were sufficient for an app this size; adding one would be extra complexity with no real
+  benefit here.
+  
 
 ## Possible next steps
 
